@@ -276,7 +276,7 @@ namespace DBHelpers
 
             using (DbConnection connection = CreateConnection())
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 affectedRows = await ExecuteNonQueryAsync(command, connection);
 
@@ -348,7 +348,7 @@ namespace DBHelpers
 
             using (DbConnection connection = CreateConnection())
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 o = await ExecuteScalarAsync<T>(command, converter, connection);
 
@@ -405,15 +405,15 @@ namespace DBHelpers
             return command.ExecuteReaderAsync();
         }
 
-        public Task<DbDataReader> ExecuteReaderAsync(DbCommand command)
+        public async Task<DbDataReader> ExecuteReaderAsync(DbCommand command)
         {
             OnExecuteCommand(command);
 
             DbConnection connection = CreateConnection();
             command.Connection = connection;
-            connection.Open();
+            await connection.OpenAsync();
 
-            return command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+            return await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
         }
 
         #endregion
@@ -469,7 +469,7 @@ namespace DBHelpers
 
         #region ExecuteDataTableAsync
 
-        public async Task<DataTable> ExecuteDataTableAsync(DbCommand command, int startRecord, int maxRecords, DbConnection connection)
+        public Task<DataTable> ExecuteDataTableAsync(DbCommand command, int startRecord, int maxRecords, DbConnection connection)
         {
             OnExecuteCommand(command);
 
@@ -481,11 +481,11 @@ namespace DBHelpers
             DataTable dt = new DataTable();
 
             if (startRecord >= 0 || maxRecords >= 0)
-                await Task.Run(() => adapter.Fill(startRecord, maxRecords, dt));
+                adapter.Fill(startRecord, maxRecords, dt);
             else
-                await Task.Run(() => adapter.Fill(dt));
+                adapter.Fill(dt);
 
-            return dt;
+            return Task.FromResult(dt);
         }
 
         public async Task<DataTable> ExecuteDataTableAsync(DbCommand command, int startRecord, int maxRecords)
@@ -494,7 +494,7 @@ namespace DBHelpers
 
             using (DbConnection connection = CreateConnection())
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 dt = await ExecuteDataTableAsync(command, startRecord, maxRecords, connection);
 
@@ -553,7 +553,7 @@ namespace DBHelpers
 
         #region ExecuteDataSetAsync
 
-        public async Task<DataSet> ExecuteDataSetAsync(DbCommand command, DbConnection connection)
+        public Task<DataSet> ExecuteDataSetAsync(DbCommand command, DbConnection connection)
         {
             OnExecuteCommand(command);
 
@@ -563,9 +563,9 @@ namespace DBHelpers
             adapter.SelectCommand = command;
 
             DataSet ds = new DataSet();
-            await Task.Run(() => adapter.Fill(ds));
+            adapter.Fill(ds);
 
-            return ds;
+            return Task.FromResult(ds);
         }
 
         public async Task<DataSet> ExecuteDataSetAsync(DbCommand command)
@@ -574,7 +574,7 @@ namespace DBHelpers
 
             using (DbConnection connection = CreateConnection())
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 ds = await ExecuteDataSetAsync(command, connection);
 
@@ -680,7 +680,7 @@ namespace DBHelpers
 
             using (DbConnection connection = CreateConnection())
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 arr = await ExecuteArrayAsync<T>(command, converter, startRecord, maxRecords, connection);
 
@@ -820,7 +820,7 @@ namespace DBHelpers
 
             using (DbConnection connection = CreateConnection())
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 dict = await ExecuteDictionaryAsync<TKey, TValue>(command, keyConverter, valueConverter, startRecord, maxRecords, connection);
 
@@ -938,7 +938,7 @@ namespace DBHelpers
 
             using (DbConnection connection = CreateConnection())
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 o = await ExecuteObjectAsync<T>(command, converter, connection);
 
@@ -1064,7 +1064,7 @@ namespace DBHelpers
 
             using (DbConnection connection = CreateConnection())
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 list = await ExecuteListAsync<T>(command, converter, startRecord, maxRecords, connection);
 
